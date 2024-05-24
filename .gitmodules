@@ -1,0 +1,3 @@
+[submodule "lib/spqlios-arithmetic"]
+	path = lib/spqlios-arithmetic
+	url = git@github.com:tfhe/spqlios-arithmetic
