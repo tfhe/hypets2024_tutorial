@@ -1,20 +1,22 @@
 #ifndef SPQLIOS_HYPETS_SAMPLES_AUTOMORPHISMS_H
 #define SPQLIOS_HYPETS_SAMPLES_AUTOMORPHISMS_H
 
-#include <random>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
+#include <random>
 
 #include "spqlios/arithmetic/vec_znx_arithmetic.h"
 
-constexpr uint64_t N = 64;  // fixed ring dimension
-constexpr uint64_t K = 16;  // fixed limb size (2^16 bits)
-constexpr uint64_t message_limbs = 4; // number of message limbs
-constexpr uint64_t ell = 5; // size of input and output ringlwe
-constexpr uint64_t autom_nrows = 5; // nrows of the autom matrix
-constexpr uint64_t autom_ncols = 6; // nrows of the autom matrix
+constexpr uint64_t N = 64;             // fixed ring dimension
+constexpr uint64_t K = 16;             // fixed limb size (2^16 bits)
+constexpr uint64_t message_limbs = 4;  // number of message limbs
+constexpr uint64_t ell = 5;            // size of input and output ringlwe
+constexpr uint64_t autom_nrows = 5;    // nrows of the autom matrix
+constexpr uint64_t autom_ncols = 6;    // nrows of the autom matrix
 
 typedef int64_t Int64VecN[N];
+
+uint8_t* get_tmp_space(uint64_t bytes);
 
 /**
  * decrypts the input ciphertext, and outputs the noise level detected
@@ -24,11 +26,9 @@ double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
                     const int64_t* a, const int64_t* b, uint64_t nlimbs,  //
                     const SVP_PPOL* skey);
 
-
 void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                   int64_t* a, int64_t* b, uint64_t nlimbs,  //
                   const int64_t* mu, const SVP_PPOL* skey);
-
 
 /** @brief macro that crashes if the condition are not met */
 #define REQUIRE_DRAMATICALLY(req_contition, error_msg)                                                        \
@@ -75,6 +75,8 @@ void round_polynomial_noise(uint64_t nn,              // ring dimension
                             double* rem, int64_t* res, uint64_t res_size, uint64_t res_sl, const int64_t* a,
                             uint64_t a_size, uint64_t a_sl);
 
-
+#define DECLARE_3D_ZERO_MATRIX(varname, vartype, vardim1, vardim2, vardim3) \
+  std::vector<vartype> varname##_raw((vardim1) * (vardim2) * (vardim3), 0); \
+  vartype(*varname)[vardim2][vardim3] = (vartype(*)[vardim2][vardim3])varname##_raw.data()
 
 #endif  // SPQLIOS_HYPETS_SAMPLES_AUTOMORPHISMS_H
