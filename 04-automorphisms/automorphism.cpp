@@ -112,4 +112,5 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
                                tmp_space);
 
   free(temp_dft);
+  free(autom_a_dft);
 }
