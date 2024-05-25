@@ -30,6 +30,19 @@ void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                   int64_t* a, int64_t* b, uint64_t nlimbs,  //
                   const int64_t* mu, const SVP_PPOL* skey);
 
+void create_keyswitch(const MODULE* module, int64_t p, uint64_t k,  //
+                      VMP_PMAT* autom_ks_a, VMP_PMAT* autom_ks_b,   //
+                      const int64_t* skey, const SVP_PPOL* skey_dft);
+
+void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
+                        int64_t* res_a, int64_t* res_b,               //
+                        const int64_t* in_a, const int64_t* in_b,     //
+                        const VMP_PMAT* autom_ks_a, const VMP_PMAT* autom_ks_b);
+
+void apply_automorphism_on_plaintext(const MODULE* module, int64_t p, uint64_t k,  //
+                                     int64_t* res_mu,                              //
+                                     const int64_t* in_mu);
+
 /** @brief macro that crashes if the condition are not met */
 #define REQUIRE_DRAMATICALLY(req_contition, error_msg)                                                        \
   do {                                                                                                        \
