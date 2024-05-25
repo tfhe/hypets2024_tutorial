@@ -9,7 +9,7 @@
 
 constexpr uint64_t N = 64;             // fixed ring dimension
 constexpr uint64_t K = 16;             // fixed limb size (2^16 bits)
-constexpr uint64_t message_limbs = 4;  // number of message limbs
+constexpr uint64_t message_limbs = 3;  // number of message limbs
 constexpr uint64_t ell = 5;            // size of input and output ringlwe
 constexpr uint64_t autom_nrows = 5;    // nrows of the autom matrix
 constexpr uint64_t autom_ncols = 6;    // nrows of the autom matrix

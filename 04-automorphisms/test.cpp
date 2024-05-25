@@ -40,7 +40,7 @@ TEST(automorphism, automorphism) {
 
   Int64VecN mu[message_limbs];
 
-  uint64_t p = -5;
+  int64_t p = 3;
 
   VMP_PMAT* ks_a = vmp_pmat_alloc(module, autom_nrows, autom_ncols);
   VMP_PMAT* ks_b = vmp_pmat_alloc(module, autom_nrows, autom_ncols);
