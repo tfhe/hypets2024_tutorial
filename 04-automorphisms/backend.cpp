@@ -7,8 +7,7 @@ uint8_t* get_tmp_space(uint64_t bytes);
 
 void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                   int64_t* a, int64_t* b, uint64_t nlimbs,  //
-                  const int64_t* mu, uint64_t mu_limbs,
-                  const SVP_PPOL* skey) {
+                  const int64_t* mu, uint64_t mu_limbs, const SVP_PPOL* skey) {
   std::vector<Int64VecN> tmp(nlimbs);
   VEC_ZNX_DFT* tmp_dft = vec_znx_dft_alloc(module, nlimbs);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp_dft;
@@ -45,7 +44,7 @@ void rlwe_encrypt(const MODULE* module, uint64_t k,         //
 }
 
 double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
-                    int64_t* mu, uint64_t mu_limbs,                                         //
+                    int64_t* mu, uint64_t mu_limbs,                       //
                     const int64_t* a, const int64_t* b, uint64_t nlimbs,  //
                     const SVP_PPOL* skey) {
   std::vector<Int64VecN> tmp(nlimbs);

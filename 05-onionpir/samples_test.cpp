@@ -5,8 +5,8 @@
 #include "cmath"
 #include "gtest/gtest.h"
 #include "onionpir.h"
-#include "tiny_fhe.h"
 #include "spqlios/arithmetic/vec_znx_arithmetic.h"
+#include "tiny_fhe.h"
 
 /** @file this test file mimics what a user would actually write: only public api */
 

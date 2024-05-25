@@ -31,7 +31,6 @@ TEST(automorphism, encrypt_decrypt) {
   delete_module_info(module);
 }
 
-
 TEST(automorphism, automorphism) {
   MODULE* module = new_module_info(N, FFT64);
 
@@ -55,14 +54,13 @@ TEST(automorphism, automorphism) {
 
   Int64VecN autom_mu[message_limbs];
 
-
   // generate a secret key
   random_binary(N, skey_raw);
   svp_prepare(module, skey, skey_raw);
 
   // generate the autom ks
-  create_keyswitch(module, p, K, //
-                   ks_a, ks_b, //
+  create_keyswitch(module, p, K,  //
+                   ks_a, ks_b,    //
                    skey_raw, skey);
 
   // generate a random message
@@ -74,18 +72,18 @@ TEST(automorphism, automorphism) {
   rlwe_encrypt(module, K, *a, *b, ell, *mu, message_limbs, skey);
 
   // apply automorphism on ciphertext
-  apply_automorphism(module, p, K, //
-                     *autom_a, *autom_b, //
-                     *a, *b, //
-                     ks_a, ks_b); //
+  apply_automorphism(module, p, K,        //
+                     *autom_a, *autom_b,  //
+                     *a, *b,              //
+                     ks_a, ks_b);         //
 
   // apply the automorphism in plaintext
-  apply_automorphism_on_plaintext(module, p, K,  *autom_mu, *mu);
+  apply_automorphism_on_plaintext(module, p, K, *autom_mu, *mu);
 
   double noise_log2 = rlwe_decrypt(module, K, *decrypted, message_limbs, *autom_a, *autom_b, ell, skey);
-  //ASSERT_LE(noise_log2, -double(K * ell));
-  for (uint64_t i=0; i<message_limbs; ++i) {
-    for (uint64_t j=0; j<N; j++) {
+  // ASSERT_LE(noise_log2, -double(K * ell));
+  for (uint64_t i = 0; i < message_limbs; ++i) {
+    for (uint64_t j = 0; j < N; j++) {
       ASSERT_EQ(autom_mu[i][j], decrypted[i][j]);
     }
   }

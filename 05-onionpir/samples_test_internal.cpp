@@ -810,10 +810,10 @@ TEST(onionpir, onionpir_trace_expand) {
     std::cerr << "output noise: " << log2(decr.noise_amplitude) << std::endl;
 
     // check result is reduced
-    for (uint64_t j=0; j<mu_size; ++j) {
-      int64_t& v = decr.decrypted[j*N];
-      ASSERT_EQ(v, mulmessage[j*N+i]);
-      v=0;
+    for (uint64_t j = 0; j < mu_size; ++j) {
+      int64_t& v = decr.decrypted[j * N];
+      ASSERT_EQ(v, mulmessage[j * N + i]);
+      v = 0;
     }
     check_2D_zero(decr.decrypted.data(), mu_size, ONIONPIR_N);
   }

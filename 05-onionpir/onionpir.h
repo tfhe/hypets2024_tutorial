@@ -223,7 +223,6 @@ void onionpir_query_expand_phase2(const MODULE* module,                 //
                                   const onionpir_cloud_key& cloud_key,  //
                                   const onionpir_input_query& input_query);
 
-
 /** generate the expanded onion pir query from the secret key (phase2 only) */
 void onionpir_generate_queryexp_phase2(const MODULE* module,                  // N
                                        uint64_t col,                          // col index in DB_cols
@@ -250,7 +249,6 @@ EXPORT void onionpir_final_decrypt(const MODULE* module,             // N
                                    const onionpir_secret_key& skey,  // secret key
                                    const onionpir_phase2_results& c);
 
-
 /** generate the expanded onion pir query from the secret key (phase2 only) */
 void onionpir_rlwe_trivial_encrypt_inplace(const MODULE* module,               // N
                                            int64_t* rlwe, uint64_t rlwe_size,  // interleaved rlwe
@@ -270,7 +268,5 @@ void onionpir_trace_expand(const MODULE* module,                                
                            const int64_t* in_rlwe, uint64_t in_size,                    //
                            const onionpir_cloud_key& ckey                               //
 );
-
-
 
 #endif  // SPQLIOS_ONIONPIR_H

@@ -22,7 +22,7 @@ uint8_t* get_tmp_space(uint64_t bytes);
  * decrypts the input ciphertext, and outputs the noise level detected
  * plaintext is base 2^k normalized, and  */
 double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
-                    int64_t* mu, uint64_t mu_limbs,                                        //
+                    int64_t* mu, uint64_t mu_limbs,                       //
                     const int64_t* a, const int64_t* b, uint64_t nlimbs,  //
                     const SVP_PPOL* skey);
 
