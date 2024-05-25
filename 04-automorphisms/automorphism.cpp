@@ -27,13 +27,21 @@ void create_keyswitch(const MODULE* module, int64_t p, uint64_t k, VMP_PMAT* aut
                        skey, 1, N);
   DECLARE_3D_ZERO_MATRIX(q_a, int64_t, autom_nrows, autom_ncols, N);
   DECLARE_3D_ZERO_MATRIX(q_b, int64_t, autom_nrows, autom_ncols, N);
+  DECLARE_3D_ZERO_MATRIX(mu_b, int64_t, autom_nrows, autom_ncols, N);
   for (uint64_t j = 0; j < autom_nrows; ++j) {
-    memcpy(q_b[j][j], autom_s.data(), N * sizeof(int64_t));
-    rlwe_encrypt(module, k, *q_a[j], *q_b[j], autom_ncols, *q_b[j], skey_dft);
+    memcpy(mu_b[j][j], autom_s.data(), N * sizeof(int64_t));
+  }
+  for (uint64_t j = 0; j < autom_nrows; ++j) {
+    rlwe_encrypt(module, k, *q_a[j], *q_b[j], autom_ncols, *mu_b[j], j+1, skey_dft);
   }
 
   vmp_prepare_contiguous(module, autom_ks_a, **q_a, autom_nrows, autom_ncols, tmp_space);
   vmp_prepare_contiguous(module, autom_ks_b, **q_b, autom_nrows, autom_ncols, tmp_space);
+  DECLARE_3D_ZERO_MATRIX(decr_b, int64_t, autom_nrows, autom_ncols, N);
+  //for (uint64_t j = 0; j < autom_nrows; ++j) {
+  //  rlwe_decrypt(module, k, *decr_b[j], *q_a[j], *q_b[j], autom_ncols, skey_dft);
+  //}
+
 }
 
 void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //

@@ -22,13 +22,13 @@ uint8_t* get_tmp_space(uint64_t bytes);
  * decrypts the input ciphertext, and outputs the noise level detected
  * plaintext is base 2^k normalized, and  */
 double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
-                    int64_t* mu,                                          //
+                    int64_t* mu, uint64_t mu_limbs,                                        //
                     const int64_t* a, const int64_t* b, uint64_t nlimbs,  //
                     const SVP_PPOL* skey);
 
 void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                   int64_t* a, int64_t* b, uint64_t nlimbs,  //
-                  const int64_t* mu, const SVP_PPOL* skey);
+                  const int64_t* mu, uint64_t mu_limbs, const SVP_PPOL* skey);
 
 void create_keyswitch(const MODULE* module, int64_t p, uint64_t k,  //
                       VMP_PMAT* autom_ks_a, VMP_PMAT* autom_ks_b,   //

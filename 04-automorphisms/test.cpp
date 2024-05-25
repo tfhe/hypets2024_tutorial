@@ -22,8 +22,8 @@ TEST(automorphism, encrypt_decrypt) {
   }
 
   // encrypt it (noise level = K*ell)
-  rlwe_encrypt(module, K, *a, *b, lwe_size, *mu, skey);
-  double noise_log2 = rlwe_decrypt(module, K, *decrypted, *a, *b, lwe_size, skey);
+  rlwe_encrypt(module, K, *a, *b, lwe_size, *mu, message_limbs, skey);
+  double noise_log2 = rlwe_decrypt(module, K, *decrypted, message_limbs, *a, *b, lwe_size, skey);
   ASSERT_LE(noise_log2, -double(K * lwe_size));
   ASSERT_TRUE(memcmp(*mu, *decrypted, message_limbs * N * sizeof(int64_t)) == 0);
 
@@ -71,7 +71,7 @@ TEST(automorphism, automorphism) {
   }
 
   // encrypt it (noise level = K*ell)
-  rlwe_encrypt(module, K, *a, *b, ell, *mu, skey);
+  rlwe_encrypt(module, K, *a, *b, ell, *mu, message_limbs, skey);
 
   // apply automorphism on ciphertext
   apply_automorphism(module, p, K, //
@@ -82,7 +82,7 @@ TEST(automorphism, automorphism) {
   // apply the automorphism in plaintext
   apply_automorphism_on_plaintext(module, p, K,  *autom_mu, *mu);
 
-  double noise_log2 = rlwe_decrypt(module, K, *decrypted, *autom_a, *autom_b, ell, skey);
+  double noise_log2 = rlwe_decrypt(module, K, *decrypted, message_limbs, *autom_a, *autom_b, ell, skey);
   //ASSERT_LE(noise_log2, -double(K * ell));
   for (uint64_t i=0; i<message_limbs; ++i) {
     for (uint64_t j=0; j<N; j++) {
