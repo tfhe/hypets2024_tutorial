@@ -8,7 +8,7 @@
 void apply_automorphism_on_plaintext(const MODULE* module, int64_t p, uint64_t k,  //
                                      int64_t* res_mu,                              //
                                      const int64_t* in_mu) {
-  uint8_t* tmp_space = get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, message_limbs, message_limbs));
+  uint8_t* tmp_space = get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module));
   vec_znx_automorphism(module, p,                 //
                        res_mu, message_limbs, N,  //
                        in_mu, message_limbs, N);
@@ -65,7 +65,7 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
   VEC_ZNX_BIG* temp_big = (VEC_ZNX_BIG*)temp_dft;  // alias
   uint8_t* tmp_space = get_tmp_space(std::max(
                                          vmp_apply_dft_to_dft_tmp_bytes(module, autom_ncols, ell, autom_nrows, autom_ncols),
-                                         vec_znx_big_normalize_base2k_tmp_bytes(module, ell, ell)));
+                                         vec_znx_big_normalize_base2k_tmp_bytes(module)));
   vec_znx_dft(module, //
               autom_a_dft, ell, //
               autom_a.data(), ell, N);

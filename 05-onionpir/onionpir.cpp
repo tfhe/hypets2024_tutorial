@@ -106,7 +106,7 @@ void onionpir_rlwe_trivial_encrypt_inplace(const MODULE* module,               /
     vec_znx_normalize_base2k(module, ONIONPIR_K,            //
                              c[0], a_size, 2 * ONIONPIR_N,  //
                              c[0], a_size, 2 * ONIONPIR_N,  //
-                             get_tmp_space(vec_znx_big_normalize_base2k_tmp_bytes(module, a_size, a_size)));
+                             get_tmp_space(vec_znx_big_normalize_base2k_tmp_bytes(module)));
   }
 }
 
@@ -256,7 +256,7 @@ EXPORT void onionpir_online_phase1(const MODULE* module,  // N
       ONIONPIR_query1exp_ncols,                       // res
       ONIONPIR_query1exp_nrows,                       // in
       ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols);
-  uint64_t t2 = vec_znx_big_range_normalize_base2k_tmp_bytes(module, result_a_size, ONIONPIR_query1exp_ncols);
+  uint64_t t2 = vec_znx_big_range_normalize_base2k_tmp_bytes(module);
   if (t2 > tmp_bytes_size) tmp_bytes_size = t2;
   uint8_t* tmp_bytes = get_tmp_space(tmp_bytes_size);  // prealloc
   VEC_ZNX_DFT* col_res = vec_znx_dft_alloc(module, ONIONPIR_query1exp_ncols);
@@ -318,8 +318,7 @@ void onionpir_prgsw_to_rgsw(const MODULE* module, const onionpir_cloud_key& ckey
                                 ONIONPIR_rk_ncols,  //
                                 in_a_size,          //
                                 ONIONPIR_rk_nrows, ONIONPIR_rk_ncols);
-  tb |= vec_znx_big_range_normalize_base2k_tmp_bytes(  //
-      module, out_a_size, ONIONPIR_rk_ncols);
+  tb |= vec_znx_big_range_normalize_base2k_tmp_bytes(module);
   uint8_t* tmp_bytes = get_tmp_space(tb);
 
   for (uint64_t i = 0; i < in_nrows; ++i) {
@@ -376,8 +375,7 @@ void onionpir_cmux_eval(const MODULE* module, int64_t* out_rlwe, uint64_t out_si
                                 Sout,    //
                                 Sin,     //
                                 Sin, Sout);
-  tb |= vec_znx_big_range_normalize_base2k_tmp_bytes(  //
-      module, Sout, Sout);
+  tb |= vec_znx_big_range_normalize_base2k_tmp_bytes(module);
   uint8_t* tmp_bytes = get_tmp_space(tb);
 
   // diff = c1 - c0

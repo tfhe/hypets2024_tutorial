@@ -31,7 +31,7 @@ TEST(noise, round_polynomial_noise) {
       uint64_t sa = 6;
       uint64_t a_sl = nn + 3;
       // generate a base2k random reduced a
-      std::vector<uint8_t> tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, sa, sa));
+      std::vector<uint8_t> tmp_space(vec_znx_normalize_base2k_tmp_bytes(module));
       znx_vec_i64_layout a(nn, sa, a_sl);
       a.fill_random(50);
       vec_znx_normalize_base2k(module, k, a.data(), sa, a_sl, a.data(), sa, a_sl, tmp_space.data());
@@ -796,7 +796,7 @@ TEST(onionpir, onionpir_trace_expand) {
   std::vector<int64_t> mulmessage = message;
   for (int64_t& x : mulmessage) x *= res_mult_coef;
   vec_znx_normalize_base2k(module.get(), K, mulmessage.data(), mu_size, N, mulmessage.data(), mu_size, N,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module.get(), mu_size, mu_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module.get())));
 
   // call tested function
   std::vector<int64_t> res_rlwes(res_nrows * res_ncols * ONIONPIR_N, 0);
