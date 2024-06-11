@@ -12,7 +12,7 @@ void rlwe_encrypt(const MODULE* module, uint64_t k,         //
   std::vector<Int64VecN> tmp(nlimbs);
   VEC_ZNX_DFT* tmp_dft = vec_znx_dft_alloc(module, nlimbs);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp_dft;
-  uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module, nlimbs, nlimbs);
+  uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
 
   // randomize a completely
   for (uint64_t i = 0; i < nlimbs; ++i) {
@@ -52,7 +52,7 @@ double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
   std::vector<double> rem(N);
   VEC_ZNX_DFT* tmp_dft = vec_znx_dft_alloc(module, nlimbs);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp_dft;
-  uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module, nlimbs, nlimbs);
+  uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
 
   // compute b - a.s
   svp_apply_dft(module,           //

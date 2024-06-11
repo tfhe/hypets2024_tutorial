@@ -230,7 +230,7 @@ void rlwe_encrypt_base2k(const MODULE* module,                                  
 
   // allocate temporary space for idft and big normalize
   const uint64_t idft_bytes = vec_znx_idft_tmp_bytes(module);
-  const uint64_t norm_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module, new_b_size, res_size);
+  const uint64_t norm_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
   uint8_t* tmp = get_tmp_space(idft_bytes > norm_bytes ? idft_bytes : norm_bytes);
 
   // a.s
@@ -264,7 +264,7 @@ void rlwe_phase_base2k(const MODULE* module,                              //
 
   // allocate temporary space for idft and big normalize
   const uint64_t idft_bytes = vec_znx_idft_tmp_bytes(module);
-  const uint64_t norm_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module, phi_size, a_size);
+  const uint64_t norm_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
   uint8_t* tmp = get_tmp_space(idft_bytes > norm_bytes ? idft_bytes : norm_bytes);
 
   // a.s
@@ -316,10 +316,10 @@ void rlwe_trace_expand_1step(const MODULE* module,                      //
   const uint64_t b_res1_size = res1_size / 2;
 
   vec_znx_normalize_base2k(module, log2_base2k, res1_rlwe, a_res1_size, 2 * nn, tmp1, a_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, a_res1_size, a_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 
   vec_znx_normalize_base2k(module, log2_base2k, res1_rlwe + nn, b_res1_size, 2 * nn, tmp1 + nn, b_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, b_res1_size, b_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 
   // res0 = in + in(X^p)
   vec_znx_add(module, tmp1, tmp_size, nn, in_rlwe, in_size, nn, tmp, tmp_size, nn);
@@ -329,10 +329,10 @@ void rlwe_trace_expand_1step(const MODULE* module,                      //
   const uint64_t b_res0_size = res0_size / 2;
 
   vec_znx_normalize_base2k(module, log2_base2k, res0_rlwe, a_res0_size, 2 * nn, tmp1, a_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, a_res0_size, a_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 
   vec_znx_normalize_base2k(module, log2_base2k, res0_rlwe + nn, b_res0_size, 2 * nn, tmp1 + nn, b_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, b_res0_size, b_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 }
 
 void rlwe_trace_expand_1step_no_rotation(const MODULE* module,                      //
@@ -361,8 +361,8 @@ void rlwe_trace_expand_1step_no_rotation(const MODULE* module,                  
   const uint64_t b_res0_size = res0_size / 2;
 
   vec_znx_normalize_base2k(module, log2_base2k, res0_rlwe, a_res0_size, 2 * nn, tmp, a_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, a_res0_size, a_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 
   vec_znx_normalize_base2k(module, log2_base2k, res0_rlwe + nn, b_res0_size, 2 * nn, tmp + nn, b_tmp_size, 2 * nn,
-                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module, b_res0_size, b_tmp_size)));
+                           get_tmp_space(vec_znx_normalize_base2k_tmp_bytes(module)));
 }
