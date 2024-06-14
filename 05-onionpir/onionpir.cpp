@@ -29,12 +29,12 @@ uint8_t* get_tmp_space(const uint64_t bytes) {
   static __thread uint64_t size = 0;  // current tmp size
   static __thread uint8_t* space = nullptr;
   if (bytes > size) {
-    free(space);
+    if (size != 0) spqlios_free(space);
     if (size == 0) size = 1L << 20;  // minimal size
     // double the tmp size until it fits
     while (size < bytes) size <<= 1;
     // realloc the new size (free + alloc is enough for tmp space)
-    space = (uint8_t*)aligned_alloc(64, size);
+    space = (uint8_t*)spqlios_alloc(size);
     REQUIRE_DRAMATICALLY(space != nullptr, "Out of memory");
   }
   return space;
@@ -129,7 +129,7 @@ void onionpir_rlwe_decrypt_inplace(const MODULE* module,               // N
 void onionpir_generate_secret_key(const MODULE* module, onionpir_secret_key& skey) {
   skey.s.resize(ONIONPIR_N);
   random_binary(ONIONPIR_N, skey.s.data());
-  skey.ppol_s = svp_ppol_alloc(module);
+  skey.ppol_s = new_svp_ppol(module);
   svp_prepare(module, skey.ppol_s, skey.s.data());
 }
 
@@ -179,7 +179,7 @@ void onionpir_generate_queryexp_phase1(const MODULE* module,            // N
     onionpir_rlwe_trivial_encrypt_inplace(module, *q[r], ONIONPIR_query1exp_ncols, skey);
   }
   // generate the pmat
-  qexp.query_exp_phase1 = vmp_pmat_alloc(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols);
+  qexp.query_exp_phase1 = new_vmp_pmat(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols);
   VMP_PMAT* qexpptr = qexp.query_exp_phase1;
   uint8_t* tmp_space =
       get_tmp_space(vmp_prepare_contiguous_tmp_bytes(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols));
@@ -214,7 +214,7 @@ void onionpir_generate_cloud_key_phase1(const MODULE* module, onionpir_cloud_key
       random_log2bound_symmetric(ONIONPIR_N, 8, q[j][2 * b_size - 1]);
       // onionpir_rlwe_trivial_encrypt_inplace(module, *q[j], ONIONPIR_automkey_ncols, skey);
     }
-    VMP_PMAT_UNIPTR autom_pmat(vmp_pmat_alloc(module, ONIONPIR_automkey_nrows, ONIONPIR_automkey_ncols));
+    VMP_PMAT_UNIPTR autom_pmat(new_vmp_pmat(module, ONIONPIR_automkey_nrows, ONIONPIR_automkey_ncols));
     vmp_prepare_contiguous(module, autom_pmat.get(), **q, ONIONPIR_automkey_nrows, ONIONPIR_automkey_ncols, tmp_space);
     ckey.autom[p] = std::move(autom_pmat);
 #ifdef TEST_MODE
@@ -238,7 +238,7 @@ void onionpir_generate_cloud_key_phase2(const MODULE* module, onionpir_cloud_key
     random_log2bound_symmetric(ONIONPIR_N, 8, q[j][2 * b_size - 1]);
     onionpir_rlwe_trivial_encrypt_inplace(module, *q[j], ONIONPIR_rk_ncols, skey, false);
   }
-  VMP_PMAT_UNIPTR rk_pmat(vmp_pmat_alloc(module, ONIONPIR_rk_nrows, ONIONPIR_rk_ncols));
+  VMP_PMAT_UNIPTR rk_pmat(new_vmp_pmat(module, ONIONPIR_rk_nrows, ONIONPIR_rk_ncols));
   vmp_prepare_contiguous(module, rk_pmat.get(), **q, ONIONPIR_rk_nrows, ONIONPIR_rk_ncols, tmp_space);
   ckey.rk_s = std::move(rk_pmat);
 #ifdef TEST_MODE
@@ -259,7 +259,7 @@ EXPORT void onionpir_online_phase1(const MODULE* module,  // N
   uint64_t t2 = vec_znx_big_range_normalize_base2k_tmp_bytes(module);
   if (t2 > tmp_bytes_size) tmp_bytes_size = t2;
   uint8_t* tmp_bytes = get_tmp_space(tmp_bytes_size);  // prealloc
-  VEC_ZNX_DFT* col_res = vec_znx_dft_alloc(module, ONIONPIR_query1exp_ncols);
+  VEC_ZNX_DFT* col_res = new_vec_znx_dft(module, ONIONPIR_query1exp_ncols);
   VEC_ZNX_BIG* col_res_big = (VEC_ZNX_BIG*)col_res;
   std::vector<int64_t> encoded_plaintext(ONIONPIR_db_nrows * ONIONPIR_N * 4);
   result.res.resize(ONIONPIR_results1_size * db_ncols * ONIONPIR_N);
@@ -296,7 +296,7 @@ EXPORT void onionpir_online_phase1(const MODULE* module,  // N
         col_res_big, 1, ONIONPIR_query1exp_ncols, 2,           // odd pos
         tmp_bytes);
   }
-  free(col_res);
+  delete_vec_znx_dft(col_res);
 }
 
 void onionpir_prgsw_to_rgsw(const MODULE* module, const onionpir_cloud_key& ckey, int64_t* out_rgsw, uint64_t out_nrows,
@@ -311,7 +311,7 @@ void onionpir_prgsw_to_rgsw(const MODULE* module, const onionpir_cloud_key& ckey
   const uint64_t out_a_size = (out_ncols + 1) / 2;
   const uint64_t out_b_size = out_ncols / 2;
   std::vector<int64_t> tmp_a(ONIONPIR_N * in_a_size);
-  VEC_ZNX_DFT* tmp_as2 = vec_znx_dft_alloc(module, ONIONPIR_rk_ncols);
+  VEC_ZNX_DFT* tmp_as2 = new_vec_znx_dft(module, ONIONPIR_rk_ncols);
   VEC_ZNX_BIG* tmp_as2_big = (VEC_ZNX_BIG*)tmp_as2;
   uint64_t tb = 0;
   tb |= vmp_apply_dft_tmp_bytes(module,             //
@@ -359,7 +359,7 @@ void onionpir_prgsw_to_rgsw(const MODULE* module, const onionpir_cloud_key& ckey
                              out[(2 * i) * out_ncols], out_a_size, 2 * ONIONPIR_N,  // out_a
                              tmp_bytes);
   }
-  free(tmp_as2);
+  delete_vec_znx_dft(tmp_as2);
 }
 
 /** cmux. input size is ONIONPIR_result1_size */
@@ -368,7 +368,7 @@ void onionpir_cmux_eval(const MODULE* module, int64_t* out_rlwe, uint64_t out_si
   static constexpr uint64_t Sin = ONIONPIR_query2exp_nrows;
   static constexpr uint64_t Sout = ONIONPIR_query2exp_ncols;
   std::vector<int64_t> tmp64(ONIONPIR_N * Sout);
-  VEC_ZNX_DFT* tmp = vec_znx_dft_alloc(module, Sout);
+  VEC_ZNX_DFT* tmp = new_vec_znx_dft(module, Sout);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp;
   uint64_t tb = 0;
   tb |= vmp_apply_dft_tmp_bytes(module,  //
@@ -410,7 +410,7 @@ void onionpir_cmux_eval(const MODULE* module, int64_t* out_rlwe, uint64_t out_si
                                      out_rlwe + ONIONPIR_N, out_b_size, 2 * ONIONPIR_N,  //
                                      tmp_big, 1, Sout, 2,                                //
                                      tmp_bytes);
-  free(tmp);
+  delete_vec_znx_dft(tmp);
 }
 
 void onionpir_generate_query_phase2(const MODULE* module,             //
@@ -476,7 +476,7 @@ void onionpir_generate_queryexp_phase2(const MODULE* module,             //
       onionpir_rlwe_trivial_encrypt_inplace(module, *q[j], out_ncols, skey, false);
     }
     // save it
-    VMP_PMAT* pmat = vmp_pmat_alloc(module, out_nrows, out_ncols);
+    VMP_PMAT* pmat = new_vmp_pmat(module, out_nrows, out_ncols);
     vmp_prepare_contiguous(module, pmat, **q, out_nrows, out_ncols, tmp_bytes);
     res.query_exp_phase2[i] = pmat;
 #ifdef TEST_MODE
@@ -631,8 +631,8 @@ void onionpir_query_expand_phase1(const MODULE* module,                //
                         ONIONPIR_query1_ncols, ckey);
 
   // to PRGSW
-  if (query_exp.query_exp_phase1 != nullptr) free(query_exp.query_exp_phase1);
-  query_exp.query_exp_phase1 = vmp_pmat_alloc(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols);
+  if (query_exp.query_exp_phase1 != nullptr) delete_vmp_pmat(query_exp.query_exp_phase1);
+  query_exp.query_exp_phase1 = new_vmp_pmat(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols);
 
   uint8_t* tmp_space =
       get_tmp_space(vmp_prepare_contiguous_tmp_bytes(module, ONIONPIR_query1exp_nrows, ONIONPIR_query1exp_ncols));
@@ -674,8 +674,8 @@ void onionpir_query_expand_phase2(const MODULE* module,                //
                            q_rlwes + i * ONIONPIR_query2exp_ellt * ONIONPIR_query2_ncols * nn, ONIONPIR_query2exp_ellt,
                            ONIONPIR_query2_ncols);
 
-    if (query_exp.query_exp_phase2[i] != nullptr) free(query_exp.query_exp_phase2[i]);
-    query_exp.query_exp_phase2[i] = vmp_pmat_alloc(module, ONIONPIR_query2exp_nrows, ONIONPIR_query2exp_ncols);
+    if (query_exp.query_exp_phase2[i] != nullptr) delete_vmp_pmat(query_exp.query_exp_phase2[i]);
+    query_exp.query_exp_phase2[i] = new_vmp_pmat(module, ONIONPIR_query2exp_nrows, ONIONPIR_query2exp_ncols);
     vmp_prepare_contiguous(module, query_exp.query_exp_phase2[i], q_rgsw, ONIONPIR_query2exp_nrows,
                            ONIONPIR_query2exp_ncols, tmp_space);
 

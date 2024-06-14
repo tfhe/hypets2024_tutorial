@@ -12,10 +12,7 @@ void apply_automorphism_on_plaintext(const MODULE* module, int64_t p, uint64_t k
   vec_znx_automorphism(module, p,                 //
                        res_mu, message_limbs, N,  //
                        in_mu, message_limbs, N);
-  vec_znx_normalize_base2k(module, K,
-                           res_mu, message_limbs, N,
-                           res_mu, message_limbs, N,
-                           tmp_space);
+  vec_znx_normalize_base2k(module, K, res_mu, message_limbs, N, res_mu, message_limbs, N, tmp_space);
 }
 
 void create_keyswitch(const MODULE* module, int64_t p, uint64_t k, VMP_PMAT* autom_ks_a, VMP_PMAT* autom_ks_b,
@@ -32,16 +29,15 @@ void create_keyswitch(const MODULE* module, int64_t p, uint64_t k, VMP_PMAT* aut
     memcpy(mu_b[j][j], autom_s.data(), N * sizeof(int64_t));
   }
   for (uint64_t j = 0; j < autom_nrows; ++j) {
-    rlwe_encrypt(module, k, *q_a[j], *q_b[j], autom_ncols, *mu_b[j], j+1, skey_dft);
+    rlwe_encrypt(module, k, *q_a[j], *q_b[j], autom_ncols, *mu_b[j], j + 1, skey_dft);
   }
 
   vmp_prepare_contiguous(module, autom_ks_a, **q_a, autom_nrows, autom_ncols, tmp_space);
   vmp_prepare_contiguous(module, autom_ks_b, **q_b, autom_nrows, autom_ncols, tmp_space);
   DECLARE_3D_ZERO_MATRIX(decr_b, int64_t, autom_nrows, autom_ncols, N);
-  //for (uint64_t j = 0; j < autom_nrows; ++j) {
-  //  rlwe_decrypt(module, k, *decr_b[j], *q_a[j], *q_b[j], autom_ncols, skey_dft);
-  //}
-
+  // for (uint64_t j = 0; j < autom_nrows; ++j) {
+  //   rlwe_decrypt(module, k, *decr_b[j], *q_a[j], *q_b[j], autom_ncols, skey_dft);
+  // }
 }
 
 void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
@@ -60,20 +56,19 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
                        in_b, ell, N);
 
   // autom_a_s = vmp(tmp_a, autom_ks)  -- apply idft
-  VEC_ZNX_DFT* autom_a_dft = vec_znx_dft_alloc(module, autom_ncols);  // a * automorhism(s)
-  VEC_ZNX_DFT* temp_dft = vec_znx_dft_alloc(module, autom_ncols);
+  VEC_ZNX_DFT* autom_a_dft = new_vec_znx_dft(module, autom_ncols);  // a * automorhism(s)
+  VEC_ZNX_DFT* temp_dft = new_vec_znx_dft(module, autom_ncols);
   VEC_ZNX_BIG* temp_big = (VEC_ZNX_BIG*)temp_dft;  // alias
-  uint8_t* tmp_space = get_tmp_space(std::max(
-                                         vmp_apply_dft_to_dft_tmp_bytes(module, autom_ncols, ell, autom_nrows, autom_ncols),
-                                         vec_znx_big_normalize_base2k_tmp_bytes(module)));
-  vec_znx_dft(module, //
-              autom_a_dft, ell, //
+  uint8_t* tmp_space =
+      get_tmp_space(std::max(vmp_apply_dft_to_dft_tmp_bytes(module, autom_ncols, ell, autom_nrows, autom_ncols),
+                             vec_znx_big_normalize_base2k_tmp_bytes(module)));
+  vec_znx_dft(module,            //
+              autom_a_dft, ell,  //
               autom_a.data(), ell, N);
-  vmp_apply_dft_to_dft(module, //
-                       temp_dft, autom_ncols, //
-                       autom_a_dft, ell, //
-                       autom_ks_b, autom_nrows, autom_ncols,
-                       tmp_space);
+  vmp_apply_dft_to_dft(module,                 //
+                       temp_dft, autom_ncols,  //
+                       autom_a_dft, ell,       //
+                       autom_ks_b, autom_nrows, autom_ncols, tmp_space);
 
   vec_znx_idft(module,                 //
                temp_big, autom_ncols,  //
@@ -82,20 +77,20 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
   // res = big_normalize(autom_a_s)
 
   // sub tmp_b to the b part of res (because of this, the final result is not normalized)
-  vec_znx_big_sub_small_a(module,                 // N
-                          temp_big, autom_ncols,  // res
-                          autom_b.data(), ell, N, //
+  vec_znx_big_sub_small_a(module,                  // N
+                          temp_big, autom_ncols,   // res
+                          autom_b.data(), ell, N,  //
                           temp_big, autom_ncols);
 
-  vec_znx_big_normalize_base2k(module, k, //
-                               res_b, ell, N,  //
-                               temp_big, autom_ncols, //
+  vec_znx_big_normalize_base2k(module, k,              //
+                               res_b, ell, N,          //
+                               temp_big, autom_ncols,  //
                                tmp_space);
 
-  vmp_apply_dft_to_dft(module, //
-                       temp_dft, autom_ncols, //
-                       autom_a_dft, ell, //
-                       autom_ks_a, autom_nrows, autom_ncols, //
+  vmp_apply_dft_to_dft(module,                                //
+                       temp_dft, autom_ncols,                 //
+                       autom_a_dft, ell,                      //
+                       autom_ks_a, autom_nrows, autom_ncols,  //
                        tmp_space);
   vec_znx_idft(module,                 //
                temp_big, autom_ncols,  //
@@ -104,13 +99,13 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
 
   vec_znx_big_sub(module,                 // N
                   temp_big, autom_ncols,  // res
-                  NULL, 0, //
+                  NULL, 0,                //
                   temp_big, autom_ncols);
-  vec_znx_big_normalize_base2k(module, k, //
-                               res_a, ell, N, //
-                               temp_big, autom_ncols, //
+  vec_znx_big_normalize_base2k(module, k,              //
+                               res_a, ell, N,          //
+                               temp_big, autom_ncols,  //
                                tmp_space);
 
-  free(temp_dft);
-  free(autom_a_dft);
+  delete_vec_znx_dft(temp_dft);
+  delete_vec_znx_dft(autom_a_dft);
 }

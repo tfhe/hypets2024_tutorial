@@ -184,7 +184,7 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
                        in_rlwe + nn, b_size, 2 * nn);
 
   // autom_a_s = vmp(tmp_a, autom_ks)  -- apply idft
-  VEC_ZNX_DFT* autom_a_s_dft = vec_znx_dft_alloc(module, autom_key_ncols);  // a * automorhism(s)
+  VEC_ZNX_DFT* autom_a_s_dft = new_vec_znx_dft(module, autom_key_ncols);  // a * automorhism(s)
   VEC_ZNX_BIG* autom_a_s_big = (VEC_ZNX_BIG*)autom_a_s_dft;                 // alias
   uint8_t* tmp_space =
       get_tmp_space(vmp_apply_dft_tmp_bytes(module, autom_key_ncols, a_size, autom_key_nrows, autom_key_ncols));
@@ -209,7 +209,7 @@ void apply_automorphism(const MODULE* module, int64_t p, uint64_t k,  //
   // add tmp_b to the b part of res (because of this, the final result is not normalized)
   vec_znx_add(module, res_rlwe + nn, b_res_size, 2 * nn, res_rlwe + nn, b_res_size, 2 * nn, autom_b.data(), b_size, nn);
 
-  free(autom_a_s_dft);
+  delete_vec_znx_dft(autom_a_s_dft);
 }
 
 void rlwe_encrypt_base2k(const MODULE* module,                                    //
@@ -225,7 +225,7 @@ void rlwe_encrypt_base2k(const MODULE* module,                                  
   const uint64_t res_size = a_size < new_b_size ? a_size : new_b_size;
 
   // dft(a.s)
-  VEC_ZNX_DFT* res_dft = vec_znx_dft_alloc(module, res_size);
+  VEC_ZNX_DFT* res_dft = new_vec_znx_dft(module, res_size);
   svp_apply_dft(module, res_dft, res_size, s, a, res_size, a_sl);
 
   // allocate temporary space for idft and big normalize
@@ -243,7 +243,7 @@ void rlwe_encrypt_base2k(const MODULE* module,                                  
   // normalized a.s + phi
   vec_znx_big_normalize_base2k(module, log2_base2k, new_b, new_b_size, new_b_sl, res_big, res_size, tmp);
 
-  free(res_big);
+  delete_vec_znx_big(res_big);
 }
 
 void rlwe_phase_base2k(const MODULE* module,                              //
@@ -256,7 +256,7 @@ void rlwe_phase_base2k(const MODULE* module,                              //
   const uint64_t work_size = a_size < b_size ? b_size : a_size;
 
   // dft(a.s)
-  VEC_ZNX_DFT* res_dft = vec_znx_dft_alloc(module, work_size);
+  VEC_ZNX_DFT* res_dft = new_vec_znx_dft(module, work_size);
   svp_apply_dft(module,           //
                 res_dft, a_size,  //
                 s,                // s
@@ -283,7 +283,7 @@ void rlwe_phase_base2k(const MODULE* module,                              //
                                phi, phi_size, phi_sl,  //
                                res_big, work_size, tmp);
 
-  free(res_big);
+  delete_vec_znx_big(res_big);
 }
 
 void rlwe_trace_expand_1step(const MODULE* module,                      //
