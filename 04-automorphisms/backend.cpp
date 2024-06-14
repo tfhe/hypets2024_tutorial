@@ -7,10 +7,9 @@ uint8_t* get_tmp_space(uint64_t bytes);
 
 void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                   int64_t* a, int64_t* b, uint64_t nlimbs,  //
-                  const int64_t* mu, uint64_t mu_limbs,
-                  const SVP_PPOL* skey) {
+                  const int64_t* mu, uint64_t mu_limbs, const SVP_PPOL* skey) {
   std::vector<Int64VecN> tmp(nlimbs);
-  VEC_ZNX_DFT* tmp_dft = vec_znx_dft_alloc(module, nlimbs);
+  VEC_ZNX_DFT* tmp_dft = new_vec_znx_dft(module, nlimbs);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp_dft;
   uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
 
@@ -41,16 +40,16 @@ void rlwe_encrypt(const MODULE* module, uint64_t k,         //
                                b, nlimbs, N,     //
                                tmp_big, nlimbs,  //
                                get_tmp_space(tmp_bytes));
-  free(tmp_dft);
+  delete_vec_znx_dft(tmp_dft);
 }
 
 double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
-                    int64_t* mu, uint64_t mu_limbs,                                         //
+                    int64_t* mu, uint64_t mu_limbs,                       //
                     const int64_t* a, const int64_t* b, uint64_t nlimbs,  //
                     const SVP_PPOL* skey) {
   std::vector<Int64VecN> tmp(nlimbs);
   std::vector<double> rem(N);
-  VEC_ZNX_DFT* tmp_dft = vec_znx_dft_alloc(module, nlimbs);
+  VEC_ZNX_DFT* tmp_dft = new_vec_znx_dft(module, nlimbs);
   VEC_ZNX_BIG* tmp_big = (VEC_ZNX_BIG*)tmp_dft;
   uint64_t tmp_bytes = vec_znx_big_normalize_base2k_tmp_bytes(module);
 
@@ -82,7 +81,7 @@ double rlwe_decrypt(const MODULE* module, uint64_t k,                     //
     if (d > noise_ampl) noise_ampl = d;
   }
   std::cerr << "noise log2: " << log2(noise_ampl) << std::endl;
-  free(tmp_dft);
+  delete_vec_znx_dft(tmp_dft);
   return log2(noise_ampl);
 }
 
@@ -189,7 +188,7 @@ uint8_t* get_tmp_space(const uint64_t bytes) {
     // double the tmp size until it fits
     while (size < bytes) size <<= 1;
     // realloc the new size (free + alloc is enough for tmp space)
-    space = (uint8_t*)aligned_alloc(64, size);
+    space = (uint8_t*)spqlios_alloc(size);
     REQUIRE_DRAMATICALLY(space != nullptr, "Out of memory");
   }
   return space;

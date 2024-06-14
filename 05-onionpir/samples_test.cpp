@@ -160,7 +160,7 @@ TEST(tiny_fhe, rlwe_encrypt_decrypt) {
         random_log2bound_symmetric(nn, 0, sk);
 
         // key to dft domain
-        SVP_PPOL* s = svp_ppol_alloc(mod);
+        SVP_PPOL* s = new_svp_ppol(mod);
         svp_prepare(mod, s, sk);
 
         delete[] sk;
@@ -202,7 +202,7 @@ TEST(tiny_fhe, rlwe_encrypt_decrypt) {
         delete[] phi_res;
         delete[] phi;
 
-        free(s);
+        delete_svp_ppol(s);
       }
     }
   }
@@ -224,7 +224,7 @@ TEST(tiny_fhe, rlwe_encrypt_decrypt_1) {
       random_log2bound_symmetric(nn, 0, sk);
 
       // key to dft domain
-      SVP_PPOL* s = svp_ppol_alloc(mod);
+      SVP_PPOL* s = new_svp_ppol(mod);
       svp_prepare(mod, s, sk);
 
       delete[] sk;
@@ -268,7 +268,7 @@ TEST(tiny_fhe, rlwe_encrypt_decrypt_1) {
       delete[] phi_res;
       delete[] phi;
 
-      free(s);
+      delete_svp_ppol(s);
     }
   }
 

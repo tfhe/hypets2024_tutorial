@@ -14,15 +14,15 @@
 
 template <>
 struct std::default_delete<MODULE> {
-  void operator()(MODULE* ptr) const { delete_module_info(ptr); }
+  void operator()(MODULE* ptr) const { if (ptr != nullptr) delete_module_info(ptr); }
 };
 template <>
 struct std::default_delete<VMP_PMAT> {
-  void operator()(VMP_PMAT* ptr) const { free(ptr); }
+  void operator()(VMP_PMAT* ptr) const { if (ptr != nullptr) delete_vmp_pmat(ptr); }
 };
 template <>
 struct std::default_delete<SVP_PPOL> {
-  void operator()(VMP_PMAT* ptr) const { free(ptr); }
+  void operator()(VMP_PMAT* ptr) const { if (ptr != nullptr) delete_vmp_pmat(ptr); }
 };
 
 // some unique pointers definition that autodelete objects
@@ -104,7 +104,7 @@ struct onionpir_secret_key {
   SVP_PPOL* ppol_s;
 
   inline onionpir_secret_key() : ppol_s(nullptr) {}
-  inline ~onionpir_secret_key() { free(ppol_s); }
+  inline ~onionpir_secret_key() { delete_svp_ppol(ppol_s); }
   NO_COPY(onionpir_secret_key);
 };
 
@@ -146,8 +146,10 @@ struct onionpir_expanded_query {
     for (uint64_t i = 0; i < 14; ++i) query_exp_phase2[i] = nullptr;
   }
   ~onionpir_expanded_query() {
-    free(query_exp_phase1);
-    for (uint64_t i = 0; i < 14; ++i) free(query_exp_phase2[i]);
+    if (query_exp_phase1 != nullptr) delete_vmp_pmat(query_exp_phase1);
+    for (uint64_t i = 0; i < 14; ++i) {
+      if (query_exp_phase2[i] != nullptr) delete_vmp_pmat(query_exp_phase2[i]);
+    }
   }
   NO_COPY(onionpir_expanded_query);
 };
@@ -223,7 +225,6 @@ void onionpir_query_expand_phase2(const MODULE* module,                 //
                                   const onionpir_cloud_key& cloud_key,  //
                                   const onionpir_input_query& input_query);
 
-
 /** generate the expanded onion pir query from the secret key (phase2 only) */
 void onionpir_generate_queryexp_phase2(const MODULE* module,                  // N
                                        uint64_t col,                          // col index in DB_cols
@@ -250,7 +251,6 @@ EXPORT void onionpir_final_decrypt(const MODULE* module,             // N
                                    const onionpir_secret_key& skey,  // secret key
                                    const onionpir_phase2_results& c);
 
-
 /** generate the expanded onion pir query from the secret key (phase2 only) */
 void onionpir_rlwe_trivial_encrypt_inplace(const MODULE* module,               // N
                                            int64_t* rlwe, uint64_t rlwe_size,  // interleaved rlwe
@@ -270,7 +270,5 @@ void onionpir_trace_expand(const MODULE* module,                                
                            const int64_t* in_rlwe, uint64_t in_size,                    //
                            const onionpir_cloud_key& ckey                               //
 );
-
-
 
 #endif  // SPQLIOS_ONIONPIR_H
